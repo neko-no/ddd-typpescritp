@@ -1,0 +1,6 @@
+{
+    // 公式サーバーを使用する
+    "plantuml.server": "https://www.plantuml.com/plantuml",
+    // 公式サーバーを使用する場合は、レンダリングエンジンを PlantUMLServer に設定する
+    "plantuml.render": "PlantUMLServer"
+}

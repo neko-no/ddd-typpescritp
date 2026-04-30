@@ -1,6 +1,11 @@
 package "レビュー集約" {
     ' 1. 集約とポリシーの表現
     class "Review(レビュー)" as Review << (A,red) Aggregate >> {
+        ReviewId: ReviewId
+        BookId: BookId
+        Name: 投稿者名
+        Rating: 評価
+        Comment: コメント
         extractRecofmmendedBooks(): string[]
         isTrustworthy(threshold: number): boolean
     }
@@ -19,4 +24,76 @@ package "レビュー集約" {
         閾値と比較することで信頼できるレビューかどうかを判断する。
         これにより、より価値のあるレビューをユーザーに提供することができる。
     end note
+
+    ' 3. 必要なインプットの特定
+    class "ReviewId" as ReviewId {
+        + value: string
+    }
+
+    class "BookId" as BookId {
+        + value: string
+    }
+
+    class "Name(投稿者名)" as Name {
+        + value: string
+    }
+
+    class "Rating(評価)" as Rating {
+        + value: number
+        + getQualityFactor(): number
+    }
+
+    class "Comment(コメント)" as Comment {
+        + value: string
+        + extractMatches(pattern: RegExp): string[]
+        + getSentimentScore(): number
+    }
+
+    note bottom of ReviewId
+        ReviewIdはレビューを一意に識別するためのID。
+    end note
+
+    note bottom of BookId
+        このレビューが関連する書籍ID
+    end note
+
+
+    note bottom of Name
+        MAX_LENGTH = 50
+        MIN_LENGTH = 1
+    end note
+
+    note bottom of Rating
+        評価は1から5の整数値
+        MAX = 5
+        MIN = 1
+        getQualityFactor()メソッドはRating(評価)を0.0から1.0の範囲に正規化
+        例: 1 -> 0.0, 5 -> 1.0
+        計算式: (評価値 - MIN) / (MAX - MIN)
+        レビューの信頼性の重みづけや、
+        推薦アルゴリズムでの評価の重要度計算に活用可能
+    end note
+
+    note bottom of Comment
+        MAX_LENGTH = 1000
+        MIN_LENGTH = 1
+        誹謗中傷などの不適切なコメントは作成できないようにする
+        getQualityFactor()メソッド:
+        コメントの質を0.0から1.0の範囲で評価するロジックを提供。
+        - 10文字未満: 0.2 (短すぎるコメントは質が低いとみなす)
+        - 100文字以上: 10 (高品質)
+        - 10 ~ 100文字: ながさに応じて0.2から1.0の範囲で線形にzouka
+        レビューの信頼性評価に使用される
+
+        extractMatches(pattern)メソッド:
+        正規表現パターンに一致するテキスト部分を抽出するロジックを提供。
+        例えば「〜学んだ後に読むと理解しやすい」というパターンから
+        前提書籍名を抽出するために使用される。
+    end note
+
+    Review *-- ReviewId
+    Review *-- BookId
+    Review *-- Name
+    Review *-- Rating
+    Review *-- Comment
 }

@@ -22,7 +22,10 @@
   },
   "homepage": "https://github.com/neko-no/ddd-typpescritp#readme",
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^24.12.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"

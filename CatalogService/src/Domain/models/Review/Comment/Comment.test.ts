@@ -43,4 +43,21 @@ describe("Comment", () => {
         const expectedQuality = 0.2 + 0.8 * ((50 - 10) / (100 - 10));
         expect(new Comment(midLengthComment).getQualityFactor()).toBeCloseTo(expectedQuality);
     });
+
+    test("extractMatches() 指定したパターンに一致する文字列を抽出できる", () => {
+        const comment = new Comment(
+            "この本は#素晴らしい です。#おすすめ #買って損なし"
+        );
+        // \w+ を [^\s]+ に変更 - 空白文字以外の文字シーケンスにマッチ
+        const matches = comment.extractMatches(/#([^\s]+)/g);
+        expect(matches).toEqual(["素晴らしい", "おすすめ", "買って損なし"]);
+    });
+    
+    test("extractMatches() 一致するパターンがない場合は空配列を返す", () => {
+        const comment = new Comment("特別なパターンはありません");
+        // こちらも同じパターンに合わせる
+        const matches = comment.extractMatches(/#([^\s]+)/g);
+        expect(matches).toEqual([]);
+    });
+
 });

@@ -3,7 +3,7 @@ import isEqual from "lodash/isEqual";
 export abstract class ValueObject<T, U> {
     // @ts-expect-error
     private _type: U;
-    private readonly _value: T;
+    protected readonly _value: T;
 
     constructor(value: T) {
         this.validate(value);

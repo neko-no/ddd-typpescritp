@@ -1,5 +1,4 @@
 import { Review } from "Domain/models/Review/Review";
-import { title } from "process";
 
 export class BookRecommendationDomainService {
     constructor() {}
@@ -19,7 +18,7 @@ export class BookRecommendationDomainService {
      * @param maxCount 推薦本の最大数(デフォルト3)
      * @return 推薦本のタイトルの配列(最大値はmaxCount個)
      */
-    getRecommendedBooks(reviews: Review[], maxCount: number = 3): string[] {
+    calculateTopRecommendedBooks(reviews: Review[], maxCount: number = 3): string[] {
         const trustworthyReviews = this.getTrustworthyReviews(reviews);
 
         const recommendedBooks = trustworthyReviews.reduce((acc, review) => {
@@ -28,7 +27,7 @@ export class BookRecommendationDomainService {
 
             // タイトルごとに出現回数をカウント
             bookTitles.forEach(title => {
-                acc[title] = (acc[title] || 0) + 1;  // ない場合は0からスタートして1を加算
+                acc[title] = (acc[title] || 0) + 1;  // ない場合は0で初期化して、1を加算
             });
             return acc; 
         }, {} as {[title: string]: number});

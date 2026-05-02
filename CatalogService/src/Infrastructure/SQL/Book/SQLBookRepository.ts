@@ -35,7 +35,7 @@ export class SQLBookRepository implements IBookRepository {
                     "title",
                     "author",
                     "priceAmount",
-                    "priceCurrency",
+                    "priceCurrency"
                 ) VALUES ($1, $2, $3, $4, $5)
             `;
 

@@ -13,7 +13,8 @@
         "paths": {
             "*": ["./src/*"]
         },
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "types": ["jest", "node"]
     },
     "include": ["src/**/*.ts", "src/**/*.js"],
     "exclude": ["node_modules"]

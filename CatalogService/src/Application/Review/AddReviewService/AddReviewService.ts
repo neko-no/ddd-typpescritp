@@ -49,7 +49,7 @@ export class AddReviewService {
         comment,
       );
 
-      await this.bookRepository.save(review);
+      await this.reviewRepository.save(review);
 
       return {
         id: review.reviewId.value,

@@ -6,7 +6,10 @@ import {
   AddReviewCommand,
   AddReviewService,
 } from "Application/Review/AddReviewService/AddReviewService";
-import { EditReviewService } from "Application/Review/EditReviewService/EditReviewService";
+import {
+  EditReviewCommand,
+  EditReviewService,
+} from "Application/Review/EditReviewService/EditReviewService";
 import {
   GetRecommendedBooksCommand,
   GetRecommendedBooksService,
@@ -91,6 +94,27 @@ app.post("/book/:isbn/review", async (req, res) => {
     const review = await service.execute(command);
 
     res.status(201).json({ ok: true, review });
+  } catch {
+    res.status(500).json({ ok: false });
+  }
+});
+
+// 一般ユースケース: レビュー編集機能
+app.post("/review/:reviewId", async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { name, rating, comment } = req.body;
+
+    if (!isStr(reviewId)) return invalid(res);
+    if (name && !isStr(name)) return invalid(res);
+    if (rating && !isNum(rating)) return invalid(res);
+    if (comment && !isStr(comment)) return invalid(res);
+
+    const service = new EditReviewService(reviewRepository, transactionManager);
+    const command: EditReviewCommand = { reviewId, name, rating, comment };
+    const review = await service.execute(command);
+
+    res.status(200).json({ ok: true, review });
   } catch {
     res.status(500).json({ ok: false });
   }

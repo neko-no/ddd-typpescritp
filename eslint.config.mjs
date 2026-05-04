@@ -26,6 +26,22 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: "^_", // アンダースコアで始まるエラー変数を無視
         },
       ],
+
+      "import/no-restricted-paths": [
+        "error",
+        {
+          zones: [
+            // Domain層が依存してはいけない領域
+            // ドメインのビジネスロジックの純粋性を保つため、外側の層への依存を禁止
+            {
+              from: "./src/Application/**/*",
+              target: "./src/Domain/**/!(*.spec.ts|*.test.ts)",
+              message:
+                "Domain層でApplication層をimportしてはいけません。ドメインロジックはアプリケーションの詳細から独立している必要があります",
+            },
+          ],
+        },
+      ],
     },
   },
 );

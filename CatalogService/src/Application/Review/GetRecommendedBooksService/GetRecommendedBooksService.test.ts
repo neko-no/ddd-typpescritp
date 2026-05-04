@@ -12,16 +12,17 @@ import {
   GetRecommendedBooksCommand,
   GetRecommendedBooksService,
 } from "./GetRecommendedBooksService";
+import { container } from "tsyringe";
 
 describe("GetRecommendedBooksService", () => {
   let reviewRepository: InMemoryReviewRepository;
   let getRecommendedBooksService: GetRecommendedBooksService;
 
   beforeEach(async () => {
-    reviewRepository = new InMemoryReviewRepository();
-    getRecommendedBooksService = new GetRecommendedBooksService(
-      reviewRepository,
-    );
+    getRecommendedBooksService = container.resolve(GetRecommendedBooksService);
+    reviewRepository = getRecommendedBooksService[
+      "reviewRepository"
+    ] as InMemoryReviewRepository;
   });
 
   it("書籍IDから推薦書籍のリストを取得できる", async () => {

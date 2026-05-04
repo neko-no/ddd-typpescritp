@@ -1,4 +1,3 @@
-import { MockTransactionManager } from "Application/shared/MockTransactionManager";
 import { BookId } from "Domain/models/Book/BookId/BookId";
 import { Comment } from "Domain/models/Review/Comment/Comment";
 import { Name } from "Domain/models/Review/Name/Name";
@@ -12,17 +11,17 @@ import {
   DeleteReviewCommand,
   DeleteReviewService,
 } from "./DeleteReviewService";
+import { container } from "tsyringe";
 
 describe("DeleteReviewService", () => {
   let reviewRepository: InMemoryReviewRepository;
   let deleteReviewService: DeleteReviewService;
 
   beforeEach(async () => {
-    reviewRepository = new InMemoryReviewRepository();
-    deleteReviewService = new DeleteReviewService(
-      reviewRepository,
-      new MockTransactionManager(),
-    );
+    deleteReviewService = container.resolve(DeleteReviewService);
+    reviewRepository = deleteReviewService[
+      "reviewRepository"
+    ] as InMemoryReviewRepository;
   });
 
   it("存在するレビューを削除することができる", async () => {

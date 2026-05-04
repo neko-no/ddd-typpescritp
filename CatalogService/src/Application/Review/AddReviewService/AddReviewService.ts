@@ -12,7 +12,6 @@ import { ReviewId } from "Domain/models/Review/ReviewId/ReviewId";
 import { ReviewIdentity } from "Domain/models/Review/ReviewIdentity/ReviewIdentity";
 
 import { AddReviewDTO } from "./AddReviewDTO";
-import { InMemoryBookRepository } from "Infrastructure/InMemory/Book/InMemoryBookRepository";
 
 export type AddReviewCommand = {
   bookId: string;

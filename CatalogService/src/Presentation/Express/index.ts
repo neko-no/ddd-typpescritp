@@ -1,3 +1,7 @@
+import express, { json, Response } from "express";
+import "reflect-metadata";
+import { container } from "tsyringe";
+
 import {
   RegisterBookCommand,
   RegisterBookService,
@@ -18,21 +22,13 @@ import {
   GetRecommendedBooksCommand,
   GetRecommendedBooksService,
 } from "Application/Review/GetRecommendedBooksService/GetRecommendedBooksService";
-import express, { json, Response } from "express";
-import { SQLBookRepository } from "Infrastructure/SQL/Book/SQLBookRepository";
-import { SQLReviewRepository } from "Infrastructure/SQL/Review/SQLReviewRepository";
-import { SQLClientManager } from "Infrastructure/SQL/SQLClientManager";
-import { SQLTransactionManager } from "Infrastructure/SQL/SQLTransactionManager";
+
+import "../../Program";
 
 const app = express();
 const port = 3000;
 
 app.use(json());
-
-const clientManager = new SQLClientManager(); // poolなどの管理を行ってくれるもの？
-const transactionManager = new SQLTransactionManager(clientManager);
-const bookRepository = new SQLBookRepository(clientManager);
-const reviewRepository = new SQLReviewRepository(clientManager);
 
 const isStr = (v: any): v is string => typeof v === "string" && v.length > 0;
 const isNum = (v: any): v is number => typeof v === "number" && !isNaN(v);
@@ -48,13 +44,16 @@ app.get("/book/:isbn/recommendations", async (req, res) => {
     if (!isStr(isbn)) return invalid(res);
     if (maxCount && isNaN(Number(maxCount))) return invalid(res);
 
-    const service = new GetRecommendedBooksService(reviewRepository);
+    const getRecommendedBooksService = container.resolve(
+      GetRecommendedBooksService,
+    );
+
     const command: GetRecommendedBooksCommand = {
       bookId: isbn,
       maxCount: maxCount ? Number(maxCount) : undefined,
     };
 
-    const recommendedBooks = await service.execute(command);
+    const recommendedBooks = await getRecommendedBooksService.execute(command);
     res.status(200).json({ ok: true, recommendedBooks });
   } catch {
     res.status(500).json({ ok: false });
@@ -70,9 +69,9 @@ app.post("/book", async (req, res) => {
       return invalid(res);
     }
 
-    const service = new RegisterBookService(bookRepository, transactionManager);
+    const registerBookService = container.resolve(RegisterBookService);
     const command: RegisterBookCommand = { isbn, title, author, price };
-    const book = await service.execute(command);
+    const book = await registerBookService.execute(command);
 
     res.status(200).json({ ok: true, book });
   } catch {
@@ -89,13 +88,9 @@ app.post("/book/:isbn/review", async (req, res) => {
     if (!isStr(isbn) || !isStr(name) || !isNum(rating)) return invalid(res);
     if (comment && !isStr(comment)) return invalid(res);
 
-    const service = new AddReviewService(
-      reviewRepository,
-      bookRepository,
-      transactionManager,
-    );
+    const addReviewService = container.resolve(AddReviewService);
     const command: AddReviewCommand = { bookId: isbn, name, rating, comment };
-    const review = await service.execute(command);
+    const review = await addReviewService.execute(command);
 
     res.status(201).json({ ok: true, review });
   } catch {
@@ -114,9 +109,9 @@ app.put("/review/:reviewId", async (req, res) => {
     if (rating && !isNum(rating)) return invalid(res);
     if (comment && !isStr(comment)) return invalid(res);
 
-    const service = new EditReviewService(reviewRepository, transactionManager);
+    const editReviewService = container.resolve(EditReviewService);
     const command: EditReviewCommand = { reviewId, name, rating, comment };
-    const review = await service.execute(command);
+    const review = await editReviewService.execute(command);
 
     res.status(200).json({ ok: true, review });
   } catch {
@@ -131,12 +126,9 @@ app.delete("/review/:reviewId", async (req, res) => {
 
     if (!isStr(reviewId)) return invalid(res);
 
-    const service = new DeleteReviewService(
-      reviewRepository,
-      transactionManager,
-    );
+    const deleteReviewService = container.resolve(DeleteReviewService);
     const commad: DeleteReviewCommand = { reviewId };
-    const review = service.execute(commad);
+    const review = deleteReviewService.execute(commad);
 
     res.status(204).json({ ok: true, review });
   } catch {

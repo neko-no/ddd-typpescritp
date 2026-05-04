@@ -1,3 +1,5 @@
+import { injectable, inject } from "tsyringe";
+
 import { ITransactionManager } from "Application/shared/ITransactionManager";
 import { Author } from "Domain/models/Book/Author/Author";
 import { Book } from "Domain/models/Book/Book";
@@ -16,15 +18,18 @@ export type RegisterBookCommand = {
   price: number;
 };
 
+@injectable()
 export class RegisterBookService {
   constructor(
-    private bookrepository: IBookRepository,
+    @inject("IBookRepository")
+    private bookRepository: IBookRepository,
+    @inject("ITransactionManager")
     private transactionManager: ITransactionManager,
   ) {}
 
   async execute(command: RegisterBookCommand): Promise<RegisterBookDTO> {
     return await this.transactionManager.begin(async () => {
-      const existingBook = await this.bookrepository.findById(
+      const existingBook = await this.bookRepository.findById(
         new BookId(command.isbn),
       );
 
@@ -40,7 +45,7 @@ export class RegisterBookService {
       const bookIdentity = new BookIdentity(bookId, title, author);
       const book = new Book(bookIdentity, price);
 
-      await this.bookrepository.save(book);
+      await this.bookRepository.save(book);
 
       return {
         id: book.bookId.value,

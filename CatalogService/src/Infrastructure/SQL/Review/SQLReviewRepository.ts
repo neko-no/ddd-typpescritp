@@ -1,3 +1,5 @@
+import { injectable } from "tsyringe";
+
 import { BookId } from "Domain/models/Book/BookId/BookId";
 import { Comment } from "Domain/models/Review/Comment/Comment";
 import { IReviewRepository } from "Domain/models/Review/IReviewRepository";
@@ -9,26 +11,26 @@ import { ReviewIdentity } from "Domain/models/Review/ReviewIdentity/ReviewIdenti
 
 import { SQLClientManager } from "../SQLClientManager";
 
+@injectable()
 export class SQLReviewRepository implements IReviewRepository {
+  constructor(private clientManager: SQLClientManager) {}
 
-    constructor(private clientManager: SQLClientManager) {};
+  // データベースの行からドメインオブジェクトへの変換
+  private toDamain(row: any): Review {
+    const comment = row.comment ? new Comment(row.comment) : undefined;
 
-    // データベースの行からドメインオブジェクトへの変換
-    private toDamain(row: any): Review {
-        const comment = row.comment ? new Comment(row.comment) : undefined;
+    return Review.reconstruct(
+      new ReviewIdentity(new ReviewId(row.reviewId)),
+      new BookId(row.bookId),
+      new Name(row.name),
+      new Rating(row.rating),
+      comment,
+    );
+  }
 
-        return Review.reconstruct(
-            new ReviewIdentity(new ReviewId(row.reviewId)),
-            new BookId(row.bookId),
-            new Name(row.name),
-            new Rating(row.rating),
-            comment
-        );
-    }
-
-    async save(review: Review): Promise<void> {
-        return await this.clientManager.withClient(async (client) => {
-            const query = `
+  async save(review: Review): Promise<void> {
+    return await this.clientManager.withClient(async (client) => {
+      const query = `
                 INSERT INTO "Review" (
                     "reviewId",
                     "bookId",
@@ -38,21 +40,20 @@ export class SQLReviewRepository implements IReviewRepository {
                 ) VALUES ($1, $2, $3, $4, $5)
             `;
 
-            const values = [
-                review.reviewId.value,
-                review.bookId.value,
-                review.name.value,
-                review.rating.value,
-                review.comment?.value
-            ];
-            await client.query(query, values);
+      const values = [
+        review.reviewId.value,
+        review.bookId.value,
+        review.name.value,
+        review.rating.value,
+        review.comment?.value,
+      ];
+      await client.query(query, values);
+    });
+  }
 
-        })
-    }
-
-    async update(review: Review): Promise<void> {
-        return await this.clientManager.withClient(async (client) => {
-            const query = `
+  async update(review: Review): Promise<void> {
+    return await this.clientManager.withClient(async (client) => {
+      const query = `
                 UPDATE "Review"
                 SET "bookId" = $2,
                     "name" = $3,
@@ -61,59 +62,61 @@ export class SQLReviewRepository implements IReviewRepository {
                 WHERE "reviewId" = $1
             `;
 
-            const values = [
-                review.reviewId.value,
-                review.bookId.value,
-                review.name.value,
-                review.rating.value,
-                review.comment?.value
-            ];
+      const values = [
+        review.reviewId.value,
+        review.bookId.value,
+        review.name.value,
+        review.rating.value,
+        review.comment?.value,
+      ];
 
-            const result = await client.query(query, values);
+      const result = await client.query(query, values);
 
-            if (result.rowCount === 0) {
-                throw new Error(`ID ${review.reviewId.value}のレビューが見つかりません`);
-            }
-        });
-    }
+      if (result.rowCount === 0) {
+        throw new Error(
+          `ID ${review.reviewId.value}のレビューが見つかりません`,
+        );
+      }
+    });
+  }
 
-    async delete(reviewId: ReviewId): Promise<void> {
-        return await this.clientManager.withClient(async (client) => {
-            const query = `
+  async delete(reviewId: ReviewId): Promise<void> {
+    return await this.clientManager.withClient(async (client) => {
+      const query = `
                 DELETE FROM "Review"
                 WHERE "reviewId" = $1
             `;
 
-            await client.query(query, [reviewId.value]);
-        });
-    }
+      await client.query(query, [reviewId.value]);
+    });
+  }
 
-    async findById(reviewId: ReviewId): Promise<Review | null> {
-        return await this.clientManager.withClient(async (client) => {
-            const query = `
+  async findById(reviewId: ReviewId): Promise<Review | null> {
+    return await this.clientManager.withClient(async (client) => {
+      const query = `
                 SELECT * FROM "Review"
                 WHERE "reviewId" = $1
             `;
 
-            const result = await client.query(query, [reviewId.value]);
+      const result = await client.query(query, [reviewId.value]);
 
-            if (result.rows.length === 0) {
-                return null;
-            }
+      if (result.rows.length === 0) {
+        return null;
+      }
 
-            return this.toDamain(result.rows[0]);
-        });
-    }
+      return this.toDamain(result.rows[0]);
+    });
+  }
 
-    async findAllByBookId(bookId: BookId): Promise<Review[]> {
-        return await this.clientManager.withClient(async (client) => {
-            const query = `
+  async findAllByBookId(bookId: BookId): Promise<Review[]> {
+    return await this.clientManager.withClient(async (client) => {
+      const query = `
                 SELECT * FROM "Review"
                 WHERE "bookId" = $1
             `;
 
-            const result = await client.query(query, [bookId.value]);
-            return result.rows.map((row: any) => this.toDamain(row));
-        });
-    }
+      const result = await client.query(query, [bookId.value]);
+      return result.rows.map((row: any) => this.toDamain(row));
+    });
+  }
 }

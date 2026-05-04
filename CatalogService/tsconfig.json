@@ -1,21 +1,23 @@
 {
-    "ts-node": {
-        "require": ["tsconfig-paths/register"]
+  "ts-node": {
+    "require": ["tsconfig-paths/register"],
+  },
+  "compilerOptions": {
+    "outDir": "./dist",
+    "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./src/*"],
     },
-    "compilerOptions": {
-        "outDir": "./dist",
-        "strict": true,
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "baseUrl": "./",
-        "paths": {
-            "*": ["./src/*"]
-        },
-        "esModuleInterop": true,
-        "types": ["jest", "node"]
-    },
-    "include": ["src/**/*.ts", "src/**/*.js"],
-    "exclude": ["node_modules"]
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": ["jest", "node"],
+  },
+  "include": ["src/**/*.ts", "src/**/*.js"],
+  "exclude": ["node_modules"],
 }

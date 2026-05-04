@@ -37,7 +37,33 @@ export default tseslint.config(
               from: "./src/Application/**/*",
               target: "./src/Domain/**/!(*.spec.ts|*.test.ts)",
               message:
-                "Domain層でApplication層をimportしてはいけません。ドメインロジックはアプリケーションの詳細から独立している必要があります",
+                "Domain層でApplication層をimportしてはいけません。ドメインロジックはアプリケーションの詳細から独立している必要があります。",
+            },
+            {
+              from: "./Presentation/**/*",
+              target: "./src/Domain/**/!(*.spec.ts|*.test.ts)",
+              message:
+                "Domain層でPresentation層をimportしてはいけません。ドメインロジックはUI実装の詳細から独立している必要があります。",
+            },
+            {
+              from: "./Infrastructure/**/*",
+              target: "./src/Domain/**/!(*.spec.ts|*.test.ts)",
+              message:
+                "Domain層でInfrastructure層をimportしてはいけません。ドメインロジックはデータベースやフレームワークから独立している必要があります。",
+            },
+
+            // Application層が依存してはいけない領域
+            {
+              from: "./Presentation/**/*",
+              target: "./src/Application/**/!(*.spec.ts|*.test.ts)",
+              message:
+                "Applicatoin層でPresentation層をimportしてはいけません。ユースケースはUI実装から独立している必要があります。",
+            },
+            {
+              from: "./Infrastructure/**/*",
+              target: "./src/Application/**/!(*.spec.ts|*.test.ts)",
+              message:
+                "Applicatoin層でInfrastructure層をimportしてはいけません。インターフェイスを通じて依存性を逆転してください。",
             },
           ],
         },

@@ -104,7 +104,7 @@ app.post("/book/:isbn/review", async (req, res) => {
 });
 
 // 一般ユースケース: レビュー編集機能
-app.post("/review/:reviewId", async (req, res) => {
+app.put("/review/:reviewId", async (req, res) => {
   try {
     const { reviewId } = req.params;
     const { name, rating, comment } = req.body;

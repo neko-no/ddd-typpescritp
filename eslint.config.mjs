@@ -16,5 +16,16 @@ export default tseslint.config(
         typescript: {},
       },
     },
+    rules: {
+      // アンダースコアで始まる変数を未使用エラーから除外する設定
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          varsIgnorePattern: "^_", // アンダースコアで始まる変数を無視
+          argsIgnorePattern: "^_", // アンダースコアで始まる引数を無視
+          caughtErrorsIgnorePattern: "^_", // アンダースコアで始まるエラー変数を無視
+        },
+      ],
+    },
   },
 );

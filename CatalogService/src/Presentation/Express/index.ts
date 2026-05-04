@@ -7,6 +7,10 @@ import {
   AddReviewService,
 } from "Application/Review/AddReviewService/AddReviewService";
 import {
+  DeleteReviewCommand,
+  DeleteReviewService,
+} from "Application/Review/DeleteReviewService/DeleteReviewService";
+import {
   EditReviewCommand,
   EditReviewService,
 } from "Application/Review/EditReviewService/EditReviewService";
@@ -115,6 +119,26 @@ app.post("/review/:reviewId", async (req, res) => {
     const review = await service.execute(command);
 
     res.status(200).json({ ok: true, review });
+  } catch {
+    res.status(500).json({ ok: false });
+  }
+});
+
+// 一般ユースケース: レビュー削除機能
+app.delete("/review/:reviewId", async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+
+    if (!isStr(reviewId)) return invalid(res);
+
+    const service = new DeleteReviewService(
+      reviewRepository,
+      transactionManager,
+    );
+    const commad: DeleteReviewCommand = { reviewId };
+    const review = service.execute(commad);
+
+    res.status(204).json({ ok: true, review });
   } catch {
     res.status(500).json({ ok: false });
   }

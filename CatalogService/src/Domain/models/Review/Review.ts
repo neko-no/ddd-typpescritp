@@ -7,104 +7,105 @@ import { ReviewId } from "./ReviewId/ReviewId";
 import { ReviewIdentity } from "./ReviewIdentity/ReviewIdentity";
 
 export class Review {
-    private constructor(
-        private readonly _identity: ReviewIdentity,
-        private readonly _bookId: BookId,
-        private _name: Name,
-        private _rating: Rating,
-        private _comment?: Comment
-    ){}
+  private constructor(
+    private readonly _identity: ReviewIdentity,
+    private readonly _bookId: BookId,
+    private _name: Name,
+    private _rating: Rating,
+    private _comment?: Comment,
+  ) {}
 
-    static create(
-        identity: ReviewIdentity,
-        bookId: BookId,
-        name: Name,
-        rating: Rating,
-        comment?: Comment
-    ): Review {
-        return new Review(identity, bookId, name, rating, comment);
+  static create(
+    identity: ReviewIdentity,
+    bookId: BookId,
+    name: Name,
+    rating: Rating,
+    comment?: Comment,
+  ): Review {
+    return new Review(identity, bookId, name, rating, comment);
+  }
+
+  static reconstruct(
+    identity: ReviewIdentity,
+    bookId: BookId,
+    name: Name,
+    rating: Rating,
+    comment?: Comment,
+  ): Review {
+    return new Review(identity, bookId, name, rating, comment);
+  }
+
+  /**
+   * このレビューが信頼できるかを判断
+   * @param threshold 信頼性閾値（0.0〜1.0）
+   * @returns 信頼できる場合はtrue
+   */
+  isTrustworthy(threshold: number = 0.6): boolean {
+    if (!this._comment) {
+      return this._rating.getQualityFactor() >= threshold;
     }
 
-    static reconstruct(
-        identity: ReviewIdentity,
-        bookId: BookId,
-        name: Name,
-        rating: Rating,
-        comment?: Comment
-    ): Review {
-        return new Review(identity, bookId, name, rating, comment);
+    const ratingFactor = this._rating.getQualityFactor();
+    const commentFactor = this._comment.getQualityFactor();
+
+    const combinedFactor = ratingFactor * 0.7 + commentFactor * 0.3;
+    return combinedFactor >= threshold;
+  }
+
+  /**
+   * コメントから推薦本を抽出
+   * @returns 推薦本のタイトルの配列
+   */
+  extractRecommendedBooks(): string[] {
+    if (!this._comment) {
+      return [];
     }
 
-    /**
-     * このレビューが信頼できるかを判断
-     * @param threshold 信頼性閾値（0.0〜1.0）
-     * @returns 信頼できる場合はtrue
-     */
-    isTrustworthy(threshold: number = 0.6): boolean {
-        if (!this._comment) {
-            return this._rating.getQualityFactor() >= threshold;
-        }
+    const pattern =
+      /[『「]([^』」]+)[』」][^。]{0,30}(?:読む|読んだ|学ぶ|学んだ|必要|推奨|おすすめ|良い|いい|理解)/g;
 
-        const ratingFactor = this._rating.getQualityFactor();
-        const commentFactor = this._comment.getQualityFactor();
+    const matches = this._comment.extractMatches(pattern);
+    return Array.from(new Set(matches)); // 重複を排除
+  }
 
-        const combinedFactor = ratingFactor * 0.7 + commentFactor * 0.3;
-        return combinedFactor >= threshold;
-    }
+  /**
+   * 別のレビューと同一かどうかを判定
+   * @param other 比較対象のレビュー
+   * @returns 同一の場合はtrue
+   */
+  equals(other: Review): boolean {
+    return this._identity.equals(other._identity);
+  }
 
-    /**
-     * コメントから推薦本を抽出
-     * @returns 推薦本のタイトルの配列
-     */
-    extractRecommendedBooks(): string[] {
-        if (!this._comment) {
-            return [];
-        }
+  get reviewId(): ReviewId {
+    return this._identity.reviewId;
+  }
 
-        const pattern = /[『「]([^』」]+)[』」][^。]{0,30}(?:読む|読んだ|学ぶ|学んだ|必要|推奨|おすすめ|良い|いい|理解)/g;
+  get bookId(): BookId {
+    return this._bookId;
+  }
 
-        const matches = this._comment.extractMatches(pattern);
-        return Array.from(new Set(matches)); // 重複を排除
-    }
+  get name(): Name {
+    return this._name;
+  }
 
-    /**
-     * 別のレビューと同一かどうかを判定
-     * @param other 比較対象のレビュー
-     * @returns 同一の場合はtrue
-     */
-    equals(other: Review): boolean {
-        return this._identity.equals(other._identity);
-    }
+  get rating(): Rating {
+    return this._rating;
+  }
 
-    get reviewId(): ReviewId {
-        return this._identity.reviewId;
-    }
+  get comment(): Comment | undefined {
+    return this._comment;
+  }
 
-    get bookId(): BookId {
-        return this._bookId;
-    }
+  updateName(name: Name): void {
+    this._name = name;
+  }
 
-    get name(): Name {
-        return this._name;
-    }
+  updateRating(rating: Rating): void {
+    this._rating = rating;
+  }
 
-    get rating(): Rating {
-        return this._rating;
-    }
-
-    get comment(): Comment | undefined {
-        return this._comment;
-    }
-
-    updateName(name: Name): void {
-        this._name = name;
-    }
-
-    updateRating(rating: Rating): void {
-        this._rating = rating;
-    }
-
-    editComment(comment: Comment): void {
-        this._comment = comment;
-    }
+  editComment(comment: Comment): void {
+    this._comment = comment;
+  }
 }

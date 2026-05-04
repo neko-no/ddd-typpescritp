@@ -1,4 +1,9 @@
 import {
+  RegisterBookCommand,
+  RegisterBookService,
+} from "Application/Book/RegisterBookService/RegisterBookService";
+import { EditReviewService } from "Application/Review/EditReviewService/EditReviewService";
+import {
   GetRecommendedBooksCommand,
   GetRecommendedBooksService,
 } from "Application/Review/GetRecommendedBooksService/GetRecommendedBooksService";
@@ -40,6 +45,25 @@ app.get("/book/:isbn/recommendations", async (req, res) => {
 
     const recommendedBooks = await service.execute(command);
     res.status(200).json({ ok: true, recommendedBooks });
+  } catch {
+    res.status(500).json({ ok: false });
+  }
+});
+
+// 一般ユースケース: 書籍登録
+app.post("/book", async (req, res) => {
+  try {
+    const { isbn, title, author, price } = req.body;
+
+    if (!isStr(isbn) || !isStr(title) || !isStr(author) || !isNum(price)) {
+      return invalid(res);
+    }
+
+    const service = new RegisterBookService(bookRepository, transactionManager);
+    const command: RegisterBookCommand = { isbn, title, author, price };
+    const book = await service.execute(command);
+
+    res.status(200).json({ ok: true, book });
   } catch {
     res.status(500).json({ ok: false });
   }

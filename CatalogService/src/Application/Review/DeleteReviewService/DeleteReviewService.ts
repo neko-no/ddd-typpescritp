@@ -15,7 +15,7 @@ export class DeleteReviewService {
   async execute(command: DeleteReviewCommand): Promise<void> {
     await this.transactionManager.begin(async () => {
       const reviewId = new ReviewId(command.reviewId);
-      const review = this.reviewRepository.findById(reviewId);
+      const review = await this.reviewRepository.findById(reviewId);
 
       if (!review) {
         throw new Error("レビューが存在しません");

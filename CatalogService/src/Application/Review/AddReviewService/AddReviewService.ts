@@ -1,3 +1,5 @@
+import { injectable, inject } from "tsyringe";
+
 import { ITransactionManager } from "Application/shared/ITransactionManager";
 import { BookId } from "Domain/models/Book/BookId/BookId";
 import { IBookRepository } from "Domain/models/Book/IBookRepository";
@@ -10,6 +12,7 @@ import { ReviewId } from "Domain/models/Review/ReviewId/ReviewId";
 import { ReviewIdentity } from "Domain/models/Review/ReviewIdentity/ReviewIdentity";
 
 import { AddReviewDTO } from "./AddReviewDTO";
+import { InMemoryBookRepository } from "Infrastructure/InMemory/Book/InMemoryBookRepository";
 
 export type AddReviewCommand = {
   bookId: string;
@@ -18,10 +21,14 @@ export type AddReviewCommand = {
   comment?: string;
 };
 
+@injectable()
 export class AddReviewService {
   constructor(
+    @inject("IReviewRepository")
     private reviewRepository: IReviewRepository,
+    @inject("IBookRepository")
     private bookRepository: IBookRepository,
+    @inject("ITransactionManager")
     private transactionManager: ITransactionManager,
   ) {}
 

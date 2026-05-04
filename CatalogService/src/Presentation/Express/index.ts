@@ -2,6 +2,10 @@ import {
   RegisterBookCommand,
   RegisterBookService,
 } from "Application/Book/RegisterBookService/RegisterBookService";
+import {
+  AddReviewCommand,
+  AddReviewService,
+} from "Application/Review/AddReviewService/AddReviewService";
 import { EditReviewService } from "Application/Review/EditReviewService/EditReviewService";
 import {
   GetRecommendedBooksCommand,
@@ -64,6 +68,29 @@ app.post("/book", async (req, res) => {
     const book = await service.execute(command);
 
     res.status(200).json({ ok: true, book });
+  } catch {
+    res.status(500).json({ ok: false });
+  }
+});
+
+// 一般ユースケース: レビュー投稿
+app.post("/book/:isbn/review", async (req, res) => {
+  try {
+    const { isbn } = req.params;
+    const { name, rating, comment } = req.body;
+
+    if (!isStr(isbn) || !isStr(name) || !isNum(rating)) return invalid(res);
+    if (comment && !isStr(comment)) return invalid(res);
+
+    const service = new AddReviewService(
+      reviewRepository,
+      bookRepository,
+      transactionManager,
+    );
+    const command: AddReviewCommand = { bookId: isbn, name, rating, comment };
+    const review = await service.execute(command);
+
+    res.status(201).json({ ok: true, review });
   } catch {
     res.status(500).json({ ok: false });
   }

@@ -9,9 +9,12 @@ export class CatalogServiceEventHandler {
   ) {}
 
   register() {
-    this.subscriber.subscribe("CatalogService", (event: Record<sting, any>) => {
-      this.handleDomainEvent(event);
-    });
+    this.subscriber.subscribe(
+      "CatalogService",
+      (event: Record<string, any>) => {
+        this.handleDomainEvent(event);
+      },
+    );
   }
 
   private handleDomainEvent(event: Record<string, any>) {

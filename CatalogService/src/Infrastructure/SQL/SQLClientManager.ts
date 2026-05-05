@@ -1,9 +1,10 @@
 import { AsyncLocalStorage } from "async_hooks";
 import { PoolClient } from "pg";
+import { injectable } from "tsyringe";
 
 import pool from "./db";
 
-
+@injectable()
 export class SQLClientManager {
     // コンテキスト(現在の接続)を保持するストレージ
     private asyncLocalStorage = new AsyncLocalStorage<PoolClient>();

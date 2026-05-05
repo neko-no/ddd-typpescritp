@@ -19,7 +19,7 @@ container.register("ITransactionManager", {
 });
 
 // DomainEvent
-container.register("IDmainEvenPulisher", {
+container.register("IDomainEventPublisher", {
   useClass: EventEmitterDomainEventPublisher,
 });
 

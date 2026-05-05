@@ -5,15 +5,19 @@ import { Name } from "./Name/Name";
 import { Rating } from "./Rating/Rating";
 import { ReviewId } from "./ReviewId/ReviewId";
 import { ReviewIdentity } from "./ReviewIdentity/ReviewIdentity";
+import { Aggregate } from "Domain/shared/Aggregate";
+import { DomainEvent } from "Domain/shared/DomainEvent/DomainEvent";
 
-export class Review {
+export class Review extends Aggregate<DomainEvent> {
   private constructor(
     private readonly _identity: ReviewIdentity,
     private readonly _bookId: BookId,
     private _name: Name,
     private _rating: Rating,
     private _comment?: Comment,
-  ) {}
+  ) {
+    super();
+  }
 
   static create(
     identity: ReviewIdentity,

@@ -42,7 +42,7 @@ export type ReviewDomainEvent =
   | ReviewCommentEditedEvent
   | ReviewDeletedEvent;
 
-export class ReciewEventFactory {
+export class ReviewEventFactory {
   static createReviewCreated(
     reviewId: ReviewId,
     bookId: BookId,

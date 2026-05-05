@@ -6,9 +6,12 @@ import { Rating } from "./Rating/Rating";
 import { ReviewId } from "./ReviewId/ReviewId";
 import { ReviewIdentity } from "./ReviewIdentity/ReviewIdentity";
 import { Aggregate } from "Domain/shared/Aggregate";
-import { DomainEvent } from "Domain/shared/DomainEvent/DomainEvent";
+import {
+  ReviewDomainEvent,
+  ReviewEventFactory,
+} from "Domain/shared/DomainEvent/ReviewDomainEventFactory";
 
-export class Review extends Aggregate<DomainEvent> {
+export class Review extends Aggregate<ReviewDomainEvent> {
   private constructor(
     private readonly _identity: ReviewIdentity,
     private readonly _bookId: BookId,
@@ -26,7 +29,16 @@ export class Review extends Aggregate<DomainEvent> {
     rating: Rating,
     comment?: Comment,
   ): Review {
-    return new Review(identity, bookId, name, rating, comment);
+    const review = new Review(identity, bookId, name, rating, comment);
+    const event = ReviewEventFactory.createReviewCreated(
+      identity.reviewId,
+      bookId,
+      name,
+      rating,
+      comment,
+    );
+    review.addDomainEvent(event);
+    return review;
   }
 
   static reconstruct(
@@ -102,14 +114,34 @@ export class Review extends Aggregate<DomainEvent> {
   }
 
   updateName(name: Name): void {
+    const event = ReviewEventFactory.createReviewNameUpdated(
+      this.reviewId,
+      name,
+    );
+    this.addDomainEvent(event);
     this._name = name;
   }
 
   updateRating(rating: Rating): void {
+    const event = ReviewEventFactory.createReviewRatingUpdated(
+      this.reviewId,
+      rating,
+    );
+    this.addDomainEvent(event);
     this._rating = rating;
   }
 
   editComment(comment: Comment): void {
+    const event = ReviewEventFactory.createReviewCommentEdited(
+      this.reviewId,
+      comment,
+    );
+    this.addDomainEvent(event);
     this._comment = comment;
+  }
+
+  delete(): void {
+    const event = ReviewEventFactory.createReviewDeleted(this.reviewId);
+    this.addDomainEvent(event);
   }
 }

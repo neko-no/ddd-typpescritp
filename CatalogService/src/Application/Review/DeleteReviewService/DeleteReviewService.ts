@@ -28,6 +28,8 @@ export class DeleteReviewService {
         throw new Error("レビューが存在しません");
       }
 
+      review.delete();
+
       await this.reviewRepository.delete(reviewId);
 
       return review;

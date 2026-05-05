@@ -24,6 +24,7 @@ import {
 } from "Application/Review/GetRecommendedBooksService/GetRecommendedBooksService";
 
 import "../../Program";
+import { CatalogServiceEventHandler } from "Application/DomainEventHandlers/CatalogServiceEventHandler";
 
 const app = express();
 const port = 3000;
@@ -138,4 +139,7 @@ app.delete("/review/:reviewId", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+
+  // サブスクライバーを登録
+  container.resolve(CatalogServiceEventHandler).register();
 });
